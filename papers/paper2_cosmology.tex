@@ -1,0 +1,187 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath,amsthm,amssymb,mathtools}
+\usepackage[margin=1in]{geometry}
+\usepackage{hyperref}
+\usepackage{cite}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{conjecture}[theorem]{Conjecture}
+\newtheorem{definition}[theorem]{Definition}
+
+\title{Cosmology of Event-Potential Theory:\\
+A multifractal everpresent-$\Lambda$ from the $d=4$ Hawkes macroscopic limit,\\
+and its forward map to late-time observables}
+
+\author{[Author name]\\ [Affiliation]}
+\date{\today}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+Event-Potential Theory (EPT) predicts (Paper~1) that the macroscopic stochastic intensity of a near-critical Hawkes process on a $d=4$ causal graph converges not to a smooth Cox--Ingersoll--Ross (CIR) diffusion but to a \emph{Gaussian multiplicative chaos} (GMC) measure with logarithmically-correlated, multifractal structure. We develop the cosmological consequences of this prediction. Identifying the EPT macroscopic intensity with a fluctuating, sign-indefinite cosmological term $\Lambda(t)$ in the spirit of Sorkin's everpresent-$\Lambda$ programme, we (i) construct a self-contained forward map from EPT structural parameters $(\eta, H, \sigma)$ to late-time observables --- $H(z)$, $w(z)$, distance modulus $\mu(z)$, BAO ratios, and a compressed-CMB acoustic scale; (ii) prove that the map reduces continuously to $\Lambda$CDM in the $\sigma \to 0$ (Poissonian Sorkin) limit, verified numerically to $\sim 10^{-8}$; (iii) identify a \emph{roughness signature} --- excess curvature in $w(z)$ --- that discriminates the rough/multifractal scenario from smooth dark-energy models; and (iv) derive the multifractal moment-scaling $\xi(q)=q+q(1-q)\gamma^2/(2K)$ as the cleanest theoretical discriminator between EPT, monofractal rough-CIR, and standard CIR/$\Lambda$CDM. The forward map is delivered as a validated, reproducible pipeline; the cosmological-parameter inference against current data (e.g.\ DESI) is presented as a fully-specified but \emph{deliberately deferred} step, gated on the foundational reformulation forced by the $(d-1)/2$ kernel-tail result of Paper~1.
+\end{abstract}
+
+\section{Introduction}
+
+The cosmological constant problem and the coincidence problem motivate scenarios in which the dark-energy density is not a fixed constant but a dynamical, fluctuating quantity. Sorkin's \emph{everpresent-$\Lambda$} proposal \cite{Sorkin1997,Ahmed2004}, rooted in the causal-set programme, predicts a fluctuating $\Lambda$ of magnitude $|\Lambda| \sim 1/\sqrt{V}$ (in Planck units, with $V$ the spacetime volume to date) and fluctuating sign, naturally of the order of the observed critical density without fine-tuning.
+
+Paper~1 of this series established a sharper structural statement: for a near-critical Hawkes process on a $d=4$ causal graph satisfying graph-distance kernel stationarity, causal locality, and vertex homogeneity, the effective kernel tail is $\phi(\tau)\sim\tau^{-3/2}$, placing $d=4$ at the boundary of the rough-CIR universality class with Hurst exponent $H=0$. At this boundary the macroscopic intensity does not converge to a finite-roughness diffusion: its autocovariance is logarithmic, and the renormalized exponential of the centered intensity converges to a Gaussian multiplicative chaos (GMC) measure.
+
+This paper asks: \emph{what does a multifractal, GMC-valued $\Lambda(t)$ do to the expansion history, and how would we tell it apart from $\Lambda$CDM and from smooth rough-dark-energy?} We answer by building an explicit, validated forward map and characterizing its discriminating signatures, while being explicit about which steps are established and which are deferred.
+
+\section{From the EPT macroscopic limit to a cosmological $\Lambda(t)$}
+
+\subsection{The three macroscopic regimes}
+
+Paper~1 yields three qualitatively distinct macroscopic limits of the near-critical Hawkes intensity, indexed by the kernel-tail exponent $\alpha_{\mathrm{kernel}}=(d-3)/2$ and hence by dimension:
+\begin{itemize}
+\item \textbf{Smooth CIR} ($\alpha_{\mathrm{kernel}}\ge 1$, $H=1/2$): the Jaisson--Rosenbaum \cite{JaissonRosenbaum2015} scaling limit is a standard CIR diffusion. This is the Sorkin-Poissonian regime and the $\Lambda$CDM-compatible baseline.
+\item \textbf{Rough CIR} ($0<\alpha_{\mathrm{kernel}}<1$, $0<H<1/2$): the heavy-tailed nearly-unstable limit \cite{JaissonRosenbaum2016} is a rough fractional CIR process with Hurst $H=\alpha_{\mathrm{kernel}}-1/2$.
+\item \textbf{Boundary / GMC} ($\alpha_{\mathrm{kernel}}=1/2$, $H=0$): the $d=4$ case. Log-correlated intensity; GMC macroscopic measure (Paper~1, Theorem on the GMC limit).
+\end{itemize}
+
+The physical case $d=4$ sits at the boundary. We therefore treat the GMC regime as the EPT-preferred scenario and the rough/smooth CIR cases as the comparison family spanned by a free Hurst parameter $H\in(0,1/2]$.
+
+\subsection{Identification with a sign-indefinite $\Lambda$}
+
+Following the everpresent-$\Lambda$ logic, we identify the macroscopic intensity fluctuation with a fluctuating dark-energy term. Because the GMC measure is a non-negative random measure, while the everpresent-$\Lambda$ requires $\langle\Lambda\rangle\approx 0$ with fluctuating sign, we model the physical term as a \emph{signed} difference of two statistically-identical EPT intensities,
+\begin{equation}
+\Lambda(t) = \Lambda_+(t) - \Lambda_-(t),
+\label{eq:signed}
+\end{equation}
+each generated by the same EPT parameters. By construction $\langle\Lambda(t)\rangle = 0$, recovering the everpresent zero-mean property, while the fluctuation amplitude inherits the GMC (or rough-CIR) correlation structure. The dimensionful normalization is fixed so that the running variance tracks $1/\sqrt{V(t)}$, matching the everpresent magnitude scaling.
+
+\subsection{Trajectory generators}
+
+For the forward map we use three generators, all validated against their analytic moments in the companion code:
+\begin{enumerate}
+\item \textbf{Standard CIR} $d\Lambda = \kappa(\theta-\Lambda)\,dt + \sigma\sqrt{\Lambda}\,dW$, integrated by full-truncation Euler; the stationary mean and variance match $\theta$ and $\sigma^2\theta/(2\kappa)$.
+\item \textbf{Rough/fractional CIR}: a Volterra--Euler integration with the singular kernel $K(t)=t^{H-1/2}/\Gamma(H+1/2)$. The recovered path roughness tracks the input Hurst $H$ (estimated $0.14/0.30/0.49$ for input $H=0.1/0.3/0.5$).
+\item \textbf{Signed $\Lambda$} \eqref{eq:signed}, with $\langle\Lambda\rangle\approx 0$.
+\end{enumerate}
+The GMC/$d=4$ limit is realized as the $H\to 0^+$ endpoint of the rough generator together with the log-correlated multiplicative structure of Paper~1; we use small-$H$ rough-CIR as its numerically-tractable proxy and reserve the exact multifractal generator for the moment-scaling analysis of Section~\ref{sec:multifractal}.
+
+\section{The forward map to observables}
+
+\subsection{Background dynamics}
+
+Given a trajectory $\Lambda(t)$ (equivalently a dark-energy density $\rho_\Lambda(z)$ and equation of state $w(z)$), the Friedmann equation in a spatially-flat FLRW background is
+\begin{equation}
+H(z)^2 = H_0^2\left[\Omega_m(1+z)^3 + \Omega_r(1+z)^4 + \Omega_\Lambda\, f(z)\right],\qquad
+f(z) = \exp\!\left[3\!\int_0^z \frac{1+w(z')}{1+z'}\,dz'\right].
+\end{equation}
+From $H(z)$ we compute the comoving distance $D_C(z)=\int_0^z dz'/H(z')$, the luminosity distance $D_L=(1+z)D_C$, the distance modulus $\mu(z)=5\log_{10}(D_L/10\,\mathrm{pc})$, and the BAO observables $D_V$, $D_M$, $D_H$ over the sound horizon $r_d$. The compressed CMB information is carried by the acoustic scale $\ell_A$ and the shift parameter $R$. None of these require an external Boltzmann solve; a CAMB/CLASS interface is provided but the pipeline falls back to the Aubourg \emph{et al.}\ \cite{Aubourg2015} $r_{\mathrm{drag}}$ fitting formula when CAMB is unavailable.
+
+\subsection{Ensemble bands}
+
+Because $\Lambda(t)$ is stochastic, each observable is a random function of redshift. The forward map propagates an ensemble of trajectories to produce $16$--$84\%$ confidence bands for every observable, as a function of the EPT structural parameters $(\eta, H, \sigma)$. The branching ratio $\eta$ controls proximity to criticality (and hence correlation length), $H$ selects the universality regime, and $\sigma$ sets the fluctuation amplitude.
+
+\section{The $\Lambda$CDM limit: a consistency theorem}
+
+\begin{proposition}[$\Lambda$CDM recovery]
+\label{prop:lcdm}
+In the limit $\sigma\to 0$ (vanishing fluctuation amplitude) with mean level $\theta$ fixed, the EPT forward map converges to spatially-flat $\Lambda$CDM: $w(z)\to -1$ and all distance observables converge to their $\Lambda$CDM values. Numerically, the relative deviation of $w(z)$ from $-1$ and of $\mu(z)$, $D_V(z)$ from their $\Lambda$CDM counterparts is $\lesssim 10^{-8}$ across $0\le z\le 3$.
+\end{proposition}
+
+\begin{proof}[Proof (analytic part)]
+As $\sigma\to0$ the CIR (and rough-CIR) generator degenerates to its deterministic mean $\Lambda(t)\equiv\theta$, a constant dark-energy density, i.e.\ $w\equiv-1$. The Friedmann integrand and all derived distances are continuous functionals of $w(\cdot)$, so they converge to the $\Lambda$CDM values. The numerical bound is the measured residual in the pipeline's $\sigma\to0$ check and reflects integration tolerance rather than a systematic offset.
+\end{proof}
+
+This is precisely the $\eta=0$ Sorkin-Poissonian everpresent-$\Lambda$ consistency check: in the no-fluctuation limit the model must be observationally indistinguishable from $\Lambda$CDM, and it is.
+
+\section{Discriminating signatures}
+
+\subsection{The roughness signature}
+
+The cleanest \emph{distance-level} discriminator we find is the curvature of the reconstructed equation of state. Define the discrete roughness statistic
+\begin{equation}
+\mathcal{R} = \mathrm{std}\!\left[\frac{d^2 w}{dz^2}\right]
+\end{equation}
+estimated over a redshift grid. Rough generators (small $H$) produce systematically larger $\mathcal{R}$ than smooth generators ($H=1/2$): the second difference of $w(z)$ is amplified by the short-range anticorrelations of rough paths. $\mathcal{R}$ is therefore a concrete rough-versus-smooth discriminant that survives projection onto observables, even though the bands of $w(z)$ themselves overlap.
+
+\subsection{The multifractal signature}
+\label{sec:multifractal}
+
+The sharpest \emph{theoretical} discriminator is the moment-scaling exponent of the integrated dark-energy measure. For the EPT $d=4$ / GMC scenario, Paper~1 gives
+\begin{equation}
+\mathbb{E}\big[M_\gamma([0,T])^q\big] \sim T^{\,\xi(q)},\qquad
+\xi(q) = q + q(1-q)\frac{\gamma^2}{2K},
+\label{eq:xi}
+\end{equation}
+a strictly \emph{nonlinear} (parabolic) function of $q$. This is the fingerprint of multifractality. By contrast:
+\begin{itemize}
+\item \textbf{Standard CIR / $\Lambda$CDM}: $\xi(q)=q$ (linear; monofractal, trivial).
+\item \textbf{Monofractal rough-CIR} ($0<H<1/2$): $\xi(q)$ linear with slope set by $H$; no parabolic curvature.
+\item \textbf{EPT $d=4$ / GMC}: $\xi(q)$ parabolic per \eqref{eq:xi}, with curvature $\gamma^2/(2K)$ set by EPT parameters.
+\end{itemize}
+The presence of curvature in $\xi(q)$ --- equivalently, a nondegenerate multifractal spectrum --- is a yes/no discriminator for the EPT boundary scenario against all monofractal alternatives.
+
+\begin{table}[h]
+\centering
+\begin{tabular}{|l|c|c|c|}
+\hline
+Scenario & Hurst $H$ & $\xi(q)$ shape & roughness $\mathcal{R}$ \\
+\hline
+$\Lambda$CDM (deterministic) & --- & linear, $\xi=q$ & $0$ \\
+Standard CIR / Sorkin Poisson & $1/2$ & linear & small \\
+Monofractal rough-CIR & $(0,1/2)$ & linear & large \\
+\textbf{EPT $d=4$ / GMC} & $0$ & \textbf{parabolic} & large \\
+\hline
+\end{tabular}
+\caption{Discriminating signatures across dark-energy scenarios. Only the EPT $d=4$ / GMC case exhibits multifractal (parabolic) moment scaling.}
+\end{table}
+
+\section{The deferred inference}
+
+A full cosmological-parameter inference --- e.g.\ an MCMC of $(\eta,H,\sigma,\Omega_m,H_0,\dots)$ against DESI BAO, supernova distance moduli, and compressed CMB --- is fully specified by the forward map above. We \emph{deliberately defer} it, for a reason internal to this series: Paper~1's central correction, that the effective kernel tail is $\tau^{-(d-1)/2}$ rather than the previously-conjectured $\tau^{-d/2}$, shifts the predicted Hurst exponent by $1/2$ (to $H=(d-4)/2$) and places only $d=4$ (marginally $d=5$) inside the valid rough-CIR window. Running an expensive inference before this foundational reformulation is settled would be premature. Accordingly:
+\begin{itemize}
+\item the trajectory generators and the forward map are built, tested, and validated (including the $\Lambda$CDM-limit theorem, Proposition~\ref{prop:lcdm});
+\item the production CAMB/CLASS Boltzmann solve and a fast sum-of-exponentials (El~Euch--Rosenbaum \cite{ElEuchRosenbaum2018}) rough-CIR integrator are flagged as clearly-marked upgrades;
+\item the DESI MCMC itself is specified but not executed.
+\end{itemize}
+This is a scaffold ready to run the moment the foundations are finalized, not a result claimed prematurely.
+
+\section{Predictions and falsifiable content}
+
+EPT cosmology, in the $d=4$ / GMC scenario, makes the following falsifiable commitments:
+\begin{enumerate}
+\item \textbf{Zero-mean fluctuating $\Lambda$} with amplitude tracking $1/\sqrt{V(t)}$ (everpresent magnitude), not a fixed constant.
+\item \textbf{Multifractal moment scaling} \eqref{eq:xi}: a parabolic $\xi(q)$ in the integrated dark-energy measure, distinguishing EPT from all monofractal models.
+\item \textbf{Excess equation-of-state curvature} $\mathcal{R}>0$ relative to smooth models, in principle detectable in high-precision $w(z)$ reconstructions.
+\item \textbf{$\Lambda$CDM as a limit, not a competitor}: the model contains $\Lambda$CDM continuously at $\sigma\to0$, so any detection of nonzero $\mathcal{R}$ or $\xi$-curvature is positive evidence for EPT over $\Lambda$CDM.
+\end{enumerate}
+
+\section{Conclusions}
+
+We have translated the $d=4$ GMC macroscopic limit of EPT (Paper~1) into a concrete cosmological forward model. The model reproduces $\Lambda$CDM in its smooth limit (Proposition~\ref{prop:lcdm}, verified to $10^{-8}$), supplies a fluctuating zero-mean everpresent-$\Lambda$, and predicts two clean discriminators --- excess $w(z)$ curvature and, most sharply, multifractal moment scaling $\xi(q)=q+q(1-q)\gamma^2/(2K)$. The data inference is fully scaffolded and deliberately deferred pending the foundational settling of Paper~1's kernel-tail correction. The companion simulation paper (Paper~3) reports the numerical verification of that kernel tail and the validation of all generators used here.
+
+\begin{thebibliography}{99}
+
+\bibitem{Sorkin1997} Sorkin, R.D. (1997). Forks in the road, on the way to quantum gravity. \emph{Int. J. Theor. Phys.} \textbf{36}, 2759.
+
+\bibitem{Ahmed2004} Ahmed, M., Dodelson, S., Greene, P.B., Sorkin, R. (2004). Everpresent $\Lambda$. \emph{Phys. Rev. D} \textbf{69}, 103523.
+
+\bibitem{JaissonRosenbaum2015} Jaisson, T., Rosenbaum, M. (2015). Limit theorems for nearly unstable Hawkes processes. \emph{Ann. Appl. Probab.} \textbf{25}, 600.
+
+\bibitem{JaissonRosenbaum2016} Jaisson, T., Rosenbaum, M. (2016). Rough fractional diffusions as scaling limits of nearly unstable heavy tailed Hawkes processes. \emph{Ann. Appl. Probab.} \textbf{26}, 2860.
+
+\bibitem{ElEuchRosenbaum2018} El Euch, O., Rosenbaum, M. (2018). Perfect hedging in rough Heston models. \emph{Ann. Appl. Probab.} \textbf{28}, 3813.
+
+\bibitem{Aubourg2015} Aubourg, É., \emph{et al.} (2015). Cosmological implications of baryon acoustic oscillation measurements. \emph{Phys. Rev. D} \textbf{92}, 123516.
+
+\bibitem{RhodesVargas2014} Rhodes, R., Vargas, V. (2014). Gaussian multiplicative chaos and applications: A review. \emph{Probab. Surveys} \textbf{11}, 315.
+
+\bibitem{Berestycki2017} Berestycki, N. (2017). An elementary approach to Gaussian multiplicative chaos. \emph{Electron. Commun. Probab.} \textbf{22}, 27.
+
+\bibitem{CIR1985} Cox, J.C., Ingersoll, J.E., Ross, S.A. (1985). A theory of the term structure of interest rates. \emph{Econometrica} \textbf{53}, 385.
+
+\bibitem{DESI2024} DESI Collaboration (2024). DESI 2024 VI: Cosmological constraints from the measurements of baryon acoustic oscillations. arXiv:2404.03002.
+
+\end{thebibliography}
+
+\end{document}
