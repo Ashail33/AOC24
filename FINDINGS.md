@@ -97,13 +97,51 @@ settled.
 
 ---
 
+## Follow-up work (post-merge, same session)
+
+### Two correctness bugs fixed (from Codex review)
+- **`rough_cir.py` (P1):** an erroneous extra `*dt` in the Volterra update shrank
+  rough-CIR mean-reversion and variance by ~dt (H=0.5 stationary variance was
+  0.0025 instead of 0.125). Fixed; now matches σ²b/(2a). The committed Workstream-C
+  *results* were unaffected because the forward model renormalises the trajectory
+  to a target RMS, but the generator is now correct for direct use. Also fixed the
+  roughness estimator to use short lags only (the Hölder exponent is an s→0
+  property).
+- **`simulator.py` (P2):** the branching cascade renormalised offspring back
+  inside the box at the boundary instead of letting them leak. Fixed via a
+  non-compacted neighbour table (offspring leak out-of-box correctly). Committed
+  Workstream-A results used large boxes with **zero** boundary hits, so they are
+  unchanged (verified). Regression tests added for both.
+
+### Workstream B v2 — stacked plaquette → **conjecture now supported**
+The v1 plaquette had no directed Hamiltonian cycle, so its peak was an artifact.
+Stacking T causal layers (forward inter-layer arrows, no CTC) and measuring the
+honest observable — **cross-layer propagation lift** = p_prop − chance baseline —
+shows a **significant interior peak in (η\*, 1) near η ≈ 0.5–0.6**: cycles
+propagate causally up the stack several times more often than chance (≈5σ at the
+peak in the quick run). Unlike v1 (lift ≡ 0), this is genuine persistence. Caveat:
+persistence length is still modest (~1.1 layers) — real propagation, not yet
+long-lived solitons; a braided/larger-coupling v3 is the natural next step.
+(`plaquette_particles_v2/`)
+
+### Ballistic-time theorem note
+`hawkes_graph/ballistic_time_theorem.md` states and proves the structural result
+behind Workstream A: the Hawkes generation count concentrates as n = τ/δ_φ +
+O(√τ) (renewal LLN/CLT on the cluster representation), so the time axis is
+ballistic and contributes no diffusive ½-power — which is *why* path-counting's
+d/2 collapses to (d−1)/2. Includes the open H=0 question for Paper 3.
+
+---
+
 ## How to reproduce
 
 ```bash
 pip install numpy scipy matplotlib pytest nbconvert ipykernel
-python -m pytest hawkes_graph/tests plaquette_particles/tests ept_cosmology/tests -q
+python -m pytest hawkes_graph/tests plaquette_particles/tests \
+                plaquette_particles_v2/tests ept_cosmology/tests -q
 python hawkes_graph/run_experiment.py          # Workstream A
-python plaquette_particles/eta_sweep.py        # Workstream B
+python plaquette_particles/eta_sweep.py        # Workstream B (v1)
+python plaquette_particles_v2/eta_sweep_v2.py  # Workstream B (v2, stacked)
 python ept_cosmology/forward_model.py          # Workstream C (forward map + LCDM check)
 ```
 

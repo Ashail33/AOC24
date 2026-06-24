@@ -84,21 +84,35 @@ def simulate_rough_cir(a: float, b: float, sigma: float, x0: float, H: float,
         dW = rng.standard_normal(n_paths) * sqrt_dt
         diff_incr[:, k] = sigma * np.sqrt(xp) * dW / dt  # store as a rate
 
-        # X_{k+1} = X_0 + sum_{j=0}^{k} w[k-j] * (drift_incr[j]*dt + diff_incr[j]*dt)
+        # X_{k+1} = X_0 + sum_{j=0}^{k} w[k-j] * (drift_incr[j] + diff_incr[j]).
+        # The weights w_j = int_{cell j} K(s) ds already carry the dt-measure of
+        # the Lebesgue (drift) integral, and diff_incr stores sigma*sqrt(X)*dW/dt
+        # so that w_j * diff_incr_j = (int K) * sigma*sqrt(X) * dW / dt ~=
+        # K(t_j)*sigma*sqrt(X)*dW (the pointwise Ito-Euler term).  So NO extra
+        # *dt is applied here -- multiplying again would shrink both mean
+        # reversion and variance by the step size (for H=0.5 the variance came out
+        # ~dt times too small).
         wk = w[:k + 1][::-1]                    # w[k], w[k-1], ..., w[0]
         conv_drift = drift_incr[:, :k + 1] @ wk
         conv_diff = diff_incr[:, :k + 1] @ wk
-        x = x0 + (conv_drift + conv_diff) * dt
+        x = x0 + conv_drift + conv_diff
         X[:, k + 1] = x
     return t, X
 
 
-def estimate_roughness(X: np.ndarray, dt: float) -> float:
-    """Estimate the Holder/Hurst regularity of a path from the scaling of
-    p-variation-like increments:  E[|X_{t+s}-X_t|^2] ~ s^{2H}.  Returns the
-    fitted H (averaged over paths)."""
+def estimate_roughness(X: np.ndarray, dt: float, max_lag: int = 24) -> float:
+    """Estimate the Holder/Hurst regularity of a path from the SHORT-lag scaling
+    of the second moment of increments:  E[|X_{t+s}-X_t|^2] ~ s^{2H} as s -> 0.
+    Returns the fitted H (averaged over paths).
+
+    The Holder exponent is a small-s property, so only short lags are used: long
+    lags run into mean-reversion saturation (variance flattens) which would bias H
+    downward.  `max_lag` (in steps) caps the lag range; keep it well below the
+    mean-reversion time / dt.
+    """
     X = np.atleast_2d(X)
-    lags = np.unique(np.round(np.logspace(0, np.log10(X.shape[1] // 4), 12)).astype(int))
+    hi = max(4, min(max_lag, X.shape[1] // 8))
+    lags = np.unique(np.round(np.logspace(0, np.log10(hi), 10)).astype(int))
     lags = lags[lags >= 1]
     Hs = []
     for path in X:

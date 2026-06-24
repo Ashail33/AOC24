@@ -74,7 +74,7 @@ def branching_cascade(lattice, params: HawkesParams, t_max: float,
     process restricted to a single immigrant), so it is the preferred propagator
     engine.  Generation-by-generation breadth-first expansion.
     """
-    targets, counts = lattice.build_neighbour_table()
+    targets_full = lattice.build_full_neighbour_table()
     if seed_site is None:
         seed_site = lattice.origin_index
 
@@ -97,20 +97,18 @@ def branching_cascade(lattice, params: HawkesParams, t_max: float,
         # offspring delays ~ Exp(beta); offspring times = parent time + delay
         delays = rng.exponential(1.0 / params.beta, size=n_total)
         off_t = cur_t[parent_idx] + delays
-        # offspring location: uniform over the parent's {self}+neighbours
+        # offspring location: pick uniformly over the FULL coordination (self +
+        # all 2*space_dim neighbours); offspring whose target is out of the box
+        # (-1) leak out and are dropped, so a boundary parent correctly keeps
+        # branching ratio eta * (in-box fraction) rather than renormalising.
         parent_sites = cur_s[parent_idx]
-        c = counts[parent_sites]
-        pick = (rng.random(n_total) * c).astype(np.int64)
-        off_s = targets[parent_sites, pick]
-        # (targets never -1 for pick<count by construction of build_neighbour_table)
+        pick = (rng.random(n_total) * lattice.coordination).astype(np.int64)
+        off_s = targets_full[parent_sites, pick]
 
-        # keep only events inside the window
-        keep = off_t < t_max
-        # any offspring landing exactly on padded -1 would indicate boundary; here
-        # we instead detect boundary by parents whose true coordination (full
-        # 2*space_dim+1) exceeds in-box counts -- i.e. parent on the border.
-        on_border = c[ :] < lattice.coordination
-        boundary_hits += int(np.sum(on_border & keep))
+        in_window = off_t < t_max
+        leaked = off_s < 0
+        boundary_hits += int(np.sum(leaked & in_window))  # true out-of-box leakage
+        keep = in_window & ~leaked
 
         off_t = off_t[keep]
         off_s = off_s[keep]

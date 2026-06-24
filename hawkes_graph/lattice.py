@@ -66,6 +66,7 @@ class CausalLattice:
         # Cached lookup tables (lazily built, vectorised).
         self._dist_table: np.ndarray | None = None
         self._neighbour_table: tuple[np.ndarray, np.ndarray] | None = None
+        self._full_neighbour_table: np.ndarray | None = None
 
     # ---- index <-> coordinate helpers -------------------------------------
     def coord_to_index(self, coord: np.ndarray) -> int:
@@ -124,6 +125,35 @@ class CausalLattice:
         if self._dist_table is None:
             self._dist_table = np.sum(np.abs(self.all_coords()), axis=1).astype(np.int64)
         return self._dist_table
+
+    def build_full_neighbour_table(self) -> np.ndarray:
+        """Return targets_full of shape (n_sites, coordination) giving, for each
+        site, the flat index of the neighbour in offset order (self first, then
+        the 2*space_dim axis neighbours), with -1 where the neighbour falls
+        OUTSIDE the box.
+
+        Unlike `build_neighbour_table` this is NOT compacted: column k always
+        corresponds to offset k.  It lets the branching engine sample an offspring
+        uniformly over the full coordination and DROP (leak) the ones that land
+        out of the box -- so a boundary parent correctly keeps effective branching
+        ratio eta * (in-box fraction) rather than renormalising its offspring back
+        inside the box.
+        """
+        if self._full_neighbour_table is not None:
+            return self._full_neighbour_table
+        coords = self.all_coords()
+        n = self.n_sites
+        full = np.full((n, self.coordination), -1, dtype=np.int64)
+        for k, off in enumerate(self.offsets):
+            nbr = coords + off
+            inside = np.all(np.abs(nbr) <= self.half_width, axis=1)
+            shifted = nbr + self.half_width
+            j = np.zeros(n, dtype=np.int64)
+            for c in range(self.space_dim):
+                j = j * self.side + shifted[:, c]
+            full[inside, k] = j[inside]
+        self._full_neighbour_table = full
+        return self._full_neighbour_table
 
     def build_neighbour_table(self) -> tuple[np.ndarray, np.ndarray]:
         """Return (targets, counts): a dense (n_sites, coordination) int array of

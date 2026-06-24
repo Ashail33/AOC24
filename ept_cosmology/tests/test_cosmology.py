@@ -28,6 +28,18 @@ def test_cir_stationary_variance():
     assert abs(tail.var() - mo["var"]) < 0.2 * mo["var"]
 
 
+def test_rough_cir_h_half_matches_cir_variance():
+    """At H=0.5 the rough-CIR Volterra scheme must reproduce the standard CIR
+    stationary variance sigma^2 b/(2a) (= 0.125 here).  Guards against the extra
+    dt that shrank the variance by ~dt."""
+    a, b, sigma = 1.0, 1.0, 0.5
+    rng = np.random.default_rng(0)
+    _, X = simulate_rough_cir(a, b, sigma, 1.0, 0.5, 400.0, 0.02, rng, n_paths=200)
+    tail = X[:, X.shape[1] // 2:]
+    assert abs(tail.var() - 0.125) < 0.03
+    assert abs(tail.mean() - 1.0) < 0.05
+
+
 def test_rough_cir_recovers_input_hurst():
     rng = np.random.default_rng(1)
     for H in [0.1, 0.3, 0.5]:
