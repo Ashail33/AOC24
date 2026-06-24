@@ -1,0 +1,7 @@
+numpy>=1.24
+scipy>=1.10
+matplotlib>=3.6
+pytest>=7.0
+nbconvert>=7.0
+ipykernel>=6.0
+# optional: camb  (Workstream C falls back to a fitting formula if absent)
