@@ -56,4 +56,3 @@ python -m pytest ept_cosmology/tests/ -q
 - A **fast rough-CIR integrator** — the current Volterra scheme is O(n²) per path;
   a sum-of-exponentials (El Euch–Rosenbaum) kernel approximation is the production
   upgrade.
-```
