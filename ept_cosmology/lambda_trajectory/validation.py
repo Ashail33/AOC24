@@ -35,8 +35,12 @@ def check_rough_recovers_cir(a=1.0, b=1.0, sigma=0.4, x0=1.0,
     t, X = simulate_rough_cir(a, b, sigma, x0, 0.5, t_max, dt, rng, n_paths)
     burn = X.shape[1] // 2
     emp_mean = float(X[:, burn:].mean())
+    emp_var = float(X[:, burn:].var())
+    pred_var = sigma**2 * b / (2 * a)  # CIR stationary variance
     return {"emp_mean": emp_mean, "pred_mean": b,
-            "mean_ok": abs(emp_mean - b) < 0.08 * b}
+            "emp_var": emp_var, "pred_var": pred_var,
+            "mean_ok": abs(emp_mean - b) < 0.08 * b,
+            "var_ok": abs(emp_var - pred_var) < 0.25 * pred_var}
 
 
 def check_roughness_scaling(a=1.0, b=1.0, sigma=0.3, x0=1.0,

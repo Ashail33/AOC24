@@ -63,6 +63,23 @@ def test_branching_cascade_size_matches_1_over_1_minus_eta(eta):
     assert abs(mean - 1 / (1 - eta)) < 5 * se + 0.05
 
 
+def test_branching_cascade_leaks_at_boundary():
+    """In a small box, offspring landing out-of-box must LEAK (be dropped), so the
+    mean cascade size is strictly below 1/(1-eta) and boundary_hits > 0.  Guards
+    against renormalising offspring back inside the box (which would keep boundary
+    parents at branching ratio eta)."""
+    eta = 0.9
+    p = HawkesParams(eta=eta, beta=1.0, mu=0.0)
+    small = CausalLattice(d=3, half_width=2)
+    rng = np.random.default_rng(1)
+    sizes, bh = [], 0
+    for _ in range(3000):
+        ev = branching_cascade(small, p, t_max=1e12, rng=rng)
+        sizes.append(len(ev)); bh += ev.boundary_hits
+    assert bh > 0                       # leakage actually occurs
+    assert np.mean(sizes) < 1 / (1 - eta) - 0.5   # size suppressed by leakage
+
+
 def test_engines_agree_on_cascade_size():
     lat = CausalLattice(d=2, half_width=200)
     eta = 0.7
